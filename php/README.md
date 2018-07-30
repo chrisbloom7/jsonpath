@@ -36,3 +36,25 @@ Array
 )
 */
 ```
+
+## With debugging enabled
+
+```php
+$data = jsonPath($o, "$..author", array("debug" => true));
+
+/*
+normalize - called with arguments
+----------
+string(9) "$..author"
+
+...
+
+_callback_04 - called with arguments
+----------
+string(5) "price"
+string(2) ".."
+string(6) "author"
+string(25) "a:2:{s:5:"color";s:3:"red"
+string(15) "$;store;bicycle"
+*/
+```
