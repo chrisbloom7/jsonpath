@@ -8,10 +8,11 @@
 // API function
 function jsonPath($json, $pathExpr, $args=null) {
   $jsonpath = new JsonPath();
-  $jsonpath->resultType = ($args ? $args['resultType'] : "VALUE");
-  $jsonpath->debug = ($args ? $args['debug'] : false);
+  $jsonpath->debug = (($args && $args['debug']) ? !!$args['debug'] : false);
+  $jsonpath->resultType = (($args && $args['resultType']) ? $args['resultType'] : "VALUE");
   $normalizedPathExpr = $jsonpath->normalize($pathExpr);
   $jsonpath->json = $json;
+
   if ($pathExpr && $json && ($jsonpath->resultType == "VALUE" || $jsonpath->resultType == "PATH")) {
     $jsonpath->trace(preg_replace("/^\\$;/", "", $normalizedPathExpr), $json, "$");
     if (count($jsonpath->result)) {
@@ -19,35 +20,37 @@ function jsonPath($json, $pathExpr, $args=null) {
     } else {
       return false;
     }
+  } else {
+    print("(jsonPath) SyntaxError: Not a valid resultType or invalid json or path expression");
   }
 }
 
 // JsonPath class (internal use only)
 class JsonPath {
-   var $debug = false;
-   var $json = null;
-   var $resultType = "VALUE";
-   var $result = array();
+  var $debug = false;
+  var $json = null;
+  var $result = array();
+  var $resultType = "VALUE";
 
-   // normalize path expression
+  // normalize path expression
   function normalize($pathExpr) {
     $this->d('normalize - called with arguments', $pathExpr);
 
     $pathExpr = preg_replace_callback("/[\['](\??\(.*?\))[\]']/",
                                       array(&$this, "_callback_01"),
                                       $pathExpr);
-                                      $this->d('normalize', $pathExpr);
+                                      $this->d('normalize - step 1', $pathExpr);
 
     // Matches "['" with ";", ";;;" or ";;" with ";..;", or "']" with ""
     $pathExpr = preg_replace(array("/'?\.'?|\['?/", "/;;;|;;/", "/;$|'?\]|'$/"),
                              array(";", ";..;", ""),
                              $pathExpr);
-                             $this->d('normalize', $pathExpr);
+                             $this->d('normalize - step 2', $pathExpr);
 
     $pathExpr = preg_replace_callback("/#([0-9]+)/",
                                       array(&$this, "_callback_02"),
                                       $pathExpr);
-                                      $this->d('normalize', $pathExpr);
+                                      $this->d('normalize - step 3', $pathExpr);
 
     $this->result = array();  // result array was temporarily used as a buffer
     return $pathExpr;
@@ -227,7 +230,7 @@ class JsonPath {
 
     $this->d('slice - result', $result);
     if ($result === FALSE) {
-      print("(jsonPath) SyntaxError: " . $expr);
+      print("(JsonPath) SyntaxError: " . $expr);
     }
     else {
       $this->d('slice - returning', $name);
