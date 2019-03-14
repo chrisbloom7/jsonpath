@@ -12,3 +12,4 @@ Note that while Goessner's work was the first implementation of a lexical JSONPa
 - https://github.com/joshbuddy/jsonpath
 - https://github.com/Peekmo/JsonPath (also based on Goessner's original code)
 - https://github.com/jmespath/jmespath.php
+- as well as my own https://github.com/chrisbloom7/enumpath which is an implementation of JSONPath for Ruby objects
